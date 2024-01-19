@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { React } from '../deps.ts'
 import { attachSymbolToComponent, nodeHasSymbol } from '../react.ts'
 
 const sectionSymbol = Symbol()
