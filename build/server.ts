@@ -1,5 +1,4 @@
-import { httpUtils } from './deps.ts'
-import { createWatcher } from './watcher.ts'
+import { dtils, httpUtils } from './deps.ts'
 import { log } from './log.ts'
 import { bundle } from './bundle.ts'
 
@@ -51,22 +50,18 @@ export interface StartPreviewServerParams {
 
 export async function startPreviewServer(params: StartPreviewServerParams): Promise<void> {
 	const sockets = new Set<WebSocket>()
-	const build = await bundle(params.entry)
+	let build = await bundle(params.entry)
 
 	log('Built app successfully')
 
-	let js = build.code
-
 	if (params.reload) {
-		const watcher = createWatcher({
+		const watcher = dtils.createWatcher({
 			onUpdate: async () => {
 				log('A file has been updated. Rebuilding app...')
 
 				try {
-					const build = await bundle(params.entry)
+					build = await bundle(params.entry)
 					log('Successfully rebuilt app')
-
-					js = build.code
 
 					for (const socket of sockets) {
 						socket.send('reload')
@@ -116,9 +111,13 @@ export async function startPreviewServer(params: StartPreviewServerParams): Prom
 		}
 
 		if (url.pathname === '/bundle.js') {
-			return new Response(js, {
-				headers: { 'Content-Type': 'application/js' },
+			return new Response(build.code, {
+				headers: { 'Content-Type': 'application/js', 'Source-Map': '/bundle.js.map' },
 			})
+		}
+
+		if (url.pathname === '/bundle.js.map') {
+			return new Response(build.map, { headers: { 'Content-Type': 'application/json' } })
 		}
 
 		return await httpUtils.serveDir(request, { quiet: true, fsRoot: 'public' })

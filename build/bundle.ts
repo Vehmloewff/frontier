@@ -2,11 +2,15 @@ import { denoCache } from './deps.ts'
 import { dtils, emit } from './deps.ts'
 
 export interface Bundle {
+	/** The generated JS code */
 	code: string
+	/** The generated source map */
 	map: string
+	/** A list of all the local files that were resolve from `entry` */
 	localFiles: string[]
 }
 
+/** Bundle `entryUrl` into a single file with a corresponding sourcemap. Additionally, returns all the local files that were resolved from `entry` */
 export async function bundle(entry: URL): Promise<Bundle> {
 	const config = new dtils.SafeUnknown(await dtils.readJson('deno.jsonc'))
 	const localFiles: string[] = []

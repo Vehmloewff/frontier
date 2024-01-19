@@ -5,9 +5,15 @@
 		"singleQuote": true,
 		"useTabs": true
 	},
+	"imports": {
+		"react": "https://esm.sh/preact@10.19.2/compat"
+	},
 	"lint": {
 		"rules": {
-			"include": ["no-external-import", "explicit-module-boundary-types"]
+			"include": [
+				"no-external-import",
+				"explicit-module-boundary-types"
+			]
 		}
 	}
 }

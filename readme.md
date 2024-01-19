@@ -5,4 +5,5 @@ A library for accelerating the development of frontend applications in with the 
 - Bundler
 - Dev server
 - Sensible Twind Defaults. Just input your colors
-- Several of the most common and generic input and layout components
+- Bare-bones router
+- Several of the most common and generic input and layout components (Preact)
