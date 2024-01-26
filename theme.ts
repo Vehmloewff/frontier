@@ -1,7 +1,18 @@
 import { presetAutoprefix, presetTailwind, twind } from './deps.ts'
 
-export function setupTheme(): void {
-	const colors = makeColors()
+export type Color = [number, number, number]
+
+export interface Pallette {
+	light: Color
+	dark: Color
+	primary: Color
+	secondary: Color
+	danger: Color
+	success: Color
+}
+
+export function setupTheme(pallette: Pallette): void {
+	const colors = makeColors(pallette)
 	const spacing = makeSpacing()
 
 	twind.install(twind.defineConfig({
@@ -34,6 +45,8 @@ export function setupTheme(): void {
 			-webkit-user-select: auto;
 		}
 	`
+
+	document.body.classList.add('bg-light', 'dark:bg-dark', 'text-dark', 'dark:text-light')
 }
 
 function makeVariants(red: number, green: number, blue: number) {
@@ -46,15 +59,15 @@ function makeVariants(red: number, green: number, blue: number) {
 	return variants
 }
 
-function makeColors() {
+function makeColors(pallette: Pallette) {
 	return {
 		transparent: 'transparent',
-		light: makeVariants(255, 255, 255),
-		dark: makeVariants(22, 22, 24),
-		secondary: makeVariants(245, 70, 98),
-		primary: makeVariants(62, 109, 204),
-		danger: makeVariants(184, 0, 0),
-		success: makeVariants(44, 151, 17),
+		light: makeVariants(...pallette.light),
+		dark: makeVariants(...pallette.dark),
+		primary: makeVariants(...pallette.primary),
+		secondary: makeVariants(...pallette.secondary),
+		danger: makeVariants(...pallette.danger),
+		success: makeVariants(...pallette.success),
 	}
 }
 
