@@ -2,6 +2,13 @@ import { presetAutoprefix, presetTailwind, twind } from './deps.ts'
 
 export type Color = [number, number, number]
 
+export interface ThemeOptions {
+	/** The color pallette to use */
+	pallette: Pallette
+
+	/** If `true`, the react root will be slightly rounded and the body will be transparent */
+	desktop?: boolean
+}
 export interface Pallette {
 	light: Color
 	dark: Color
@@ -11,8 +18,8 @@ export interface Pallette {
 	success: Color
 }
 
-export function setupTheme(pallette: Pallette): void {
-	const colors = makeColors(pallette)
+export function setupTheme(options: ThemeOptions): void {
+	const colors = makeColors(options.pallette)
 	const spacing = makeSpacing()
 
 	twind.install(twind.defineConfig({
@@ -31,6 +38,8 @@ export function setupTheme(pallette: Pallette): void {
 	}))
 
 	twind.injectGlobal`
+		html, body { background-color: transparent }
+
 		html,
 		body,
 		#root {
@@ -46,7 +55,11 @@ export function setupTheme(pallette: Pallette): void {
 		}
 	`
 
-	document.body.classList.add('bg-light', 'dark:bg-dark', 'text-dark', 'dark:text-light')
+	const reactRoot = document.getElementById('root')
+	if (!reactRoot) throw new Error('Expected to find a #root element')
+
+	reactRoot.classList.add('bg-light', 'dark:bg-dark', 'text-dark', 'dark:text-light')
+	if (options.desktop) reactRoot.classList.add('border-1', 'border-light-10', 'rounded-lg')
 }
 
 function makeVariants(red: number, green: number, blue: number) {
