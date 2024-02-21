@@ -8,8 +8,7 @@
 	"lint": {
 		"rules": {
 			"include": [
-				"no-external-import",
-				"explicit-module-boundary-types"
+				"no-external-import"
 			]
 		}
 	}
