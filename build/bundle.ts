@@ -15,9 +15,19 @@ export async function bundle(entry: URL): Promise<Bundle> {
 	const config = new dtils.SafeUnknown(await dtils.readJson('deno.jsonc'))
 	const localFiles: string[] = []
 
+	const unknownJsxFactory = config.asObject().get('compilerOptions', 'jsxFactory')
+	const jsxFactory = unknownJsxFactory.isNull() ? 'React.createElement' : unknownJsxFactory.asString()
+
+	const unknownJsxFragmentFactory = config.asObject().get('compilerOptions', 'jsxFragmentFactory')
+	const jsxFragmentFactory = unknownJsxFragmentFactory.isNull() ? 'React.Fragment' : unknownJsxFactory.asString()
+
 	const result = await emit.bundle(entry, {
 		importMap: config.data as emit.ImportMap,
-		compilerOptions: config.asObject().get('compilerOptions').data as emit.CompilerOptions,
+		compilerOptions: {
+			jsxFactory,
+			jsxFragmentFactory,
+			sourceMap: true,
+		},
 		async load(specifier) {
 			const cache = denoCache.createCache({ allowRemote: true })
 			const url = new URL(specifier)
