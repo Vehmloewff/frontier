@@ -112,7 +112,7 @@ export async function startPreviewServer(params: StartPreviewServerParams): Prom
 
 		if (url.pathname === '/bundle.js') {
 			return new Response(build.code, {
-				headers: { 'Content-Type': 'application/js', 'Source-Map': '/bundle.js.map' },
+				headers: { 'Content-Type': 'application/js', 'SourceMap': '/bundle.js.map' },
 			})
 		}
 
