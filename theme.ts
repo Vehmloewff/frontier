@@ -6,16 +6,19 @@ export interface ThemeOptions {
 	/** The color pallette to use */
 	pallette: Pallette
 
-	/** If `true`, the react root will be slightly rounded and the body will be transparent */
-	desktop?: boolean
+	/** If `true`, the body will be transparent, and root will be slightly rounded */
+	roundBase?: boolean
 }
+
 export interface Pallette {
 	light: Color
 	dark: Color
 	primary: Color
 	secondary: Color
 	danger: Color
+	warn: Color
 	success: Color
+	notice: Color
 }
 
 export function setupTheme(options: ThemeOptions): void {
@@ -33,12 +36,30 @@ export function setupTheme(options: ThemeOptions): void {
 				fancy: ['Josefin Sans', 'sans-serif'],
 			},
 			borderWidth: spacing,
-			gap: spacing, // Fix for twind issue that has become apparent
+			gap: spacing,
+			hash: false,
 		},
 	}))
 
-	twind.injectGlobal`
+	// background-color: rgb(${options.pallette.light[0]}, ${options.pallette.light[1]}, ${options.pallette.light[2]}) 
+	const backgroundColor = `
+		html, body { background-color: red }
+
+		@media (prefers-color-scheme: dark) {
+			html, body { background-color: rgb(${options.pallette.dark[0]}, ${options.pallette.dark[1]}, ${options.pallette.dark[2]}) }
+		}
+	`
+
+	const backgroundTransparent = `
 		html, body { background-color: transparent }
+	`
+
+	// background needs to be transparent if we are beveling the root so that the corners actually look rounded
+	const background = options.roundBase ? backgroundTransparent : backgroundColor
+
+	const rootStyle = document.createElement('style')
+	rootStyle.textContent = `
+		${background}	
 
 		html,
 		body,
@@ -54,12 +75,13 @@ export function setupTheme(options: ThemeOptions): void {
 			-webkit-user-select: auto;
 		}
 	`
+	document.head.appendChild(rootStyle)
 
 	const reactRoot = document.getElementById('root')
 	if (!reactRoot) throw new Error('Expected to find a #root element')
 
-	reactRoot.classList.add('bg-light', 'dark:bg-dark', 'text-dark', 'dark:text-light')
-	if (options.desktop) reactRoot.classList.add('border-1', 'border-light-10', 'rounded-lg')
+	reactRoot.classList.add('bg-light', 'dark:bg-dark', 'text-dark', 'dark:text-light', '!block')
+	if (options.roundBase) reactRoot.classList.add('border-1', 'border-light-10', 'rounded-lg')
 }
 
 function makeVariants(red: number, green: number, blue: number) {
@@ -80,7 +102,9 @@ function makeColors(pallette: Pallette) {
 		primary: makeVariants(...pallette.primary),
 		secondary: makeVariants(...pallette.secondary),
 		danger: makeVariants(...pallette.danger),
+		warn: makeVariants(...pallette.warn),
 		success: makeVariants(...pallette.success),
+		notice: makeVariants(...pallette.notice),
 	}
 }
 
