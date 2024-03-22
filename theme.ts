@@ -1,18 +1,38 @@
 import { presetAutoprefix, presetTailwind, twind } from './deps.ts'
 
 export type Color = [number, number, number]
+export type SelectionMode = 'opt-out' | 'opt-in'
+
+export interface DynamicTheme {
+	/** The color pallette to use when browser is the preferred color scheme is light */
+	lightPallette: Pallette
+
+	/** The color pallette to use when browser is the preferred color scheme is dark */
+	darkPallette: Pallette
+
+	/** Other theme options that can be configured */
+	options?: ThemeOptions
+}
 
 export interface ThemeOptions {
-	/** The color pallette to use */
-	pallette: Pallette
-
 	/** If `true`, the body will be transparent, and root will be slightly rounded */
 	roundBase?: boolean
+
+	/** How text selection is to be handled */
+	selectionMode?: SelectionMode
+}
+
+export interface Theme {
+	/** The color pallette to use when browser is the preferred color scheme is light */
+	pallette: Pallette
+
+	/** Other theme options that can be configured */
+	options?: ThemeOptions
 }
 
 export interface Pallette {
-	light: Color
-	dark: Color
+	fore: Color
+	base: Color
 	primary: Color
 	secondary: Color
 	danger: Color
@@ -21,11 +41,22 @@ export interface Pallette {
 	notice: Color
 }
 
-export function setupTheme(options: ThemeOptions): void {
-	const colors = makeColors(options.pallette)
-	const spacing = makeSpacing()
+export function setupDynamicTheme(theme: DynamicTheme) {
+	const schema = globalThis.window.matchMedia('(prefers-color-scheme: dark)')
 
-	twind.install(twind.defineConfig({
+	setupTheme({ pallette: schema.matches ? theme.darkPallette : theme.lightPallette, options: theme.options })
+
+	schema.onchange = (event) => {
+		setupTheme({ pallette: event.matches ? theme.darkPallette : theme.lightPallette, options: theme.options })
+	}
+}
+
+export function setupTheme(theme: Theme): void {
+	const colors = makeColors(theme.pallette)
+	const spacing = makeSpacing()
+	const options = theme.options || {}
+
+	twind.setup(twind.defineConfig({
 		presets: [presetAutoprefix(), presetTailwind()],
 		darkMode: 'media',
 		theme: {
@@ -35,52 +66,70 @@ export function setupTheme(options: ThemeOptions): void {
 				sans: ['Source Sans Pro', 'sans-serif'],
 				fancy: ['Josefin Sans', 'sans-serif'],
 			},
-			borderWidth: spacing,
+			borderWidth: {
+				'DEFAULT': '2px',
+				'sm': '2px',
+				'md': '4px',
+				'lg': '6px',
+			},
 			gap: spacing,
 			hash: false,
 		},
 	}))
 
-	const backgroundColor = `
-		html, body { background-color: rgb(${options.pallette.light[0]}, ${options.pallette.light[1]}, ${options.pallette.light[2]}) }
+	const roundBaseStyles = `
+		html, body { background-color: transparent }
 
-		@media (prefers-color-scheme: dark) {
-			html, body { background-color: rgb(${options.pallette.dark[0]}, ${options.pallette.dark[1]}, ${options.pallette.dark[2]}) }
+		#root {
+			border: 1px solid gray;
+			border-radius: 6px;
 		}
 	`
 
-	const backgroundTransparent = `
-		html, body { background-color: transparent }
+	const selectModeOptInStyles = `
+		* {
+			user-select: none;
+			-webkit-user-select: none;
+		}
+		input {
+			user-select: auto;
+			-webkit-user-select: auto;
+		}
 	`
 
-	// background needs to be transparent if we are beveling the root so that the corners actually look rounded
-	const background = options.roundBase ? backgroundTransparent : backgroundColor
-
-	const rootStyle = document.createElement('style')
+	const rootStyle = getStyleElement()
 	rootStyle.textContent = `
-		${background}	
+		html, body { background-color: rgb(${theme.pallette.base[0]}, ${theme.pallette.base[1]}, ${theme.pallette.base[2]}) }
+
+		${options.roundBase ? roundBaseStyles : ''}
+		${options.selectionMode === 'opt-in' ? selectModeOptInStyles : ''}
 
 		html,
 		body,
 		#root {
 			height: 100%;
 		}
-		* {
-			user-select: none;
-			-webkit-user-select: none;
-		}
 		input {
 			background: transparent;
-			-webkit-user-select: auto;
 		}
 	`
-	document.head.appendChild(rootStyle)
 
 	const reactRoot = document.getElementById('root')
 	if (!reactRoot) throw new Error('Expected to find a #root element')
 
-	reactRoot.classList.add('bg-light', 'dark:bg-dark', 'text-dark', 'dark:text-light', '!block')
-	if (options.roundBase) reactRoot.classList.add('border-1', 'border-light-10', 'rounded-lg')
+	reactRoot.classList.add('!block')
+}
+
+function getStyleElement() {
+	const id = 'root-styles'
+	const existingElement = document.getElementById(id)
+	if (existingElement) return existingElement
+
+	const newElement = document.createElement('style')
+	newElement.id = id
+	document.head.appendChild(newElement)
+
+	return newElement
 }
 
 function makeVariants(red: number, green: number, blue: number) {
@@ -96,8 +145,8 @@ function makeVariants(red: number, green: number, blue: number) {
 function makeColors(pallette: Pallette) {
 	return {
 		transparent: 'transparent',
-		light: makeVariants(...pallette.light),
-		dark: makeVariants(...pallette.dark),
+		base: makeVariants(...pallette.base),
+		fore: makeVariants(...pallette.fore),
 		primary: makeVariants(...pallette.primary),
 		secondary: makeVariants(...pallette.secondary),
 		danger: makeVariants(...pallette.danger),
