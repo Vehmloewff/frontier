@@ -41,9 +41,8 @@ export function setupTheme(options: ThemeOptions): void {
 		},
 	}))
 
-	// background-color: rgb(${options.pallette.light[0]}, ${options.pallette.light[1]}, ${options.pallette.light[2]}) 
 	const backgroundColor = `
-		html, body { background-color: red }
+		html, body { background-color: rgb(${options.pallette.light[0]}, ${options.pallette.light[1]}, ${options.pallette.light[2]}) }
 
 		@media (prefers-color-scheme: dark) {
 			html, body { background-color: rgb(${options.pallette.dark[0]}, ${options.pallette.dark[1]}, ${options.pallette.dark[2]}) }
