@@ -4,11 +4,11 @@ export type Color = [number, number, number]
 export type SelectionMode = 'opt-out' | 'opt-in'
 
 export interface DynamicTheme {
-	/** The color pallette to use when browser is the preferred color scheme is light */
-	lightPallette: Pallette
+	/** The color palette to use when browser is the preferred color scheme is light */
+	lightPalette: Palette
 
-	/** The color pallette to use when browser is the preferred color scheme is dark */
-	darkPallette: Pallette
+	/** The color palette to use when browser is the preferred color scheme is dark */
+	darkPalette: Palette
 
 	/** Other theme options that can be configured */
 	options?: ThemeOptions
@@ -23,14 +23,14 @@ export interface ThemeOptions {
 }
 
 export interface Theme {
-	/** The color pallette to use when browser is the preferred color scheme is light */
-	pallette: Pallette
+	/** The color palette to use when browser is the preferred color scheme is light */
+	palette: Palette
 
 	/** Other theme options that can be configured */
 	options?: ThemeOptions
 }
 
-export interface Pallette {
+export interface Palette {
 	fore: Color
 	base: Color
 	primary: Color
@@ -44,15 +44,15 @@ export interface Pallette {
 export function setupDynamicTheme(theme: DynamicTheme) {
 	const schema = globalThis.window.matchMedia('(prefers-color-scheme: dark)')
 
-	setupTheme({ pallette: schema.matches ? theme.darkPallette : theme.lightPallette, options: theme.options })
+	setupTheme({ palette: schema.matches ? theme.darkPalette : theme.lightPalette, options: theme.options })
 
 	schema.onchange = (event) => {
-		setupTheme({ pallette: event.matches ? theme.darkPallette : theme.lightPallette, options: theme.options })
+		setupTheme({ palette: event.matches ? theme.darkPalette : theme.lightPalette, options: theme.options })
 	}
 }
 
 export function setupTheme(theme: Theme): void {
-	const colors = makeColors(theme.pallette)
+	const colors = makeColors(theme.palette)
 	const spacing = makeSpacing()
 	const options = theme.options || {}
 
@@ -99,7 +99,7 @@ export function setupTheme(theme: Theme): void {
 
 	const rootStyle = getStyleElement()
 	rootStyle.textContent = `
-		html, body { background-color: rgb(${theme.pallette.base[0]}, ${theme.pallette.base[1]}, ${theme.pallette.base[2]}) }
+		html, body { background-color: rgb(${theme.palette.base[0]}, ${theme.palette.base[1]}, ${theme.palette.base[2]}) }
 
 		${options.roundBase ? roundBaseStyles : ''}
 		${options.selectionMode === 'opt-in' ? selectModeOptInStyles : ''}
@@ -142,17 +142,17 @@ function makeVariants(red: number, green: number, blue: number) {
 	return variants
 }
 
-function makeColors(pallette: Pallette) {
+function makeColors(palette: Palette) {
 	return {
 		transparent: 'transparent',
-		base: makeVariants(...pallette.base),
-		fore: makeVariants(...pallette.fore),
-		primary: makeVariants(...pallette.primary),
-		secondary: makeVariants(...pallette.secondary),
-		danger: makeVariants(...pallette.danger),
-		warn: makeVariants(...pallette.warn),
-		success: makeVariants(...pallette.success),
-		notice: makeVariants(...pallette.notice),
+		base: makeVariants(...palette.base),
+		fore: makeVariants(...palette.fore),
+		primary: makeVariants(...palette.primary),
+		secondary: makeVariants(...palette.secondary),
+		danger: makeVariants(...palette.danger),
+		warn: makeVariants(...palette.warn),
+		success: makeVariants(...palette.success),
+		notice: makeVariants(...palette.notice),
 	}
 }
 
