@@ -22,5 +22,5 @@ jobs:
         with:
           deno-version: v1.x
 
-      - name: Run CI
-        run: deno run -A https://deno.land/x/dirt@1.0.0/main.ts --ci --staging
+      - name: Check for TS Errors
+        run: deno check mod.ts build/mod.ts

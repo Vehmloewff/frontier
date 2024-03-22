@@ -11,5 +11,6 @@
 				"no-external-import"
 			]
 		}
-	}
+	},
+	"lock": false
 }
