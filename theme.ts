@@ -20,6 +20,9 @@ export interface ThemeOptions {
 
 	/** How text selection is to be handled */
 	selectionMode?: SelectionMode
+
+	/** If `true`, the body with fit it's content and scroll in the window if it is too large */
+	windowScrolling?: boolean
 }
 
 export interface Theme {
@@ -97,6 +100,15 @@ export function setupTheme(theme: Theme): void {
 		}
 	`
 
+	const pinBodyStyles = `
+		html,
+		body,
+		#root {
+			height: 100%;
+			overflow: hidden;
+		}
+	`
+
 	const rootStyle = getStyleElement()
 	rootStyle.textContent = `
 		html, body { background-color: rgb(${theme.palette.base[0]}, ${theme.palette.base[1]}, ${theme.palette.base[2]}) }
@@ -104,11 +116,12 @@ export function setupTheme(theme: Theme): void {
 		${options.roundBase ? roundBaseStyles : ''}
 		${options.selectionMode === 'opt-in' ? selectModeOptInStyles : ''}
 
-		html,
-		body,
+		${options.windowScrolling ? '' : pinBodyStyles}
+
 		#root {
-			height: 100%;
+			color: rgb(${theme.palette.fore[0]}, ${theme.palette.fore[1]}, ${theme.palette.fore[2]});
 		}
+
 		input {
 			background: transparent;
 		}
