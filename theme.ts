@@ -36,6 +36,7 @@ export interface Theme {
 export interface Palette {
 	fore: Color
 	base: Color
+	decorationFore: Color
 	primary: Color
 	secondary: Color
 	danger: Color
@@ -160,6 +161,7 @@ function makeColors(palette: Palette) {
 		transparent: 'transparent',
 		base: makeVariants(...palette.base),
 		fore: makeVariants(...palette.fore),
+		decorationFore: makeVariants(...palette.fore),
 		primary: makeVariants(...palette.primary),
 		secondary: makeVariants(...palette.secondary),
 		danger: makeVariants(...palette.danger),
